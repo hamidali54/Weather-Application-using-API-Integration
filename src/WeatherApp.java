@@ -1,63 +1,54 @@
-import java.net.http.HttpClient;
-import java.net.http.HttpResponse;
-import java.net.http.HttpRequest;
 import com.google.gson.Gson;
+
 import java.net.URI;
-import java.util.*;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.ArrayList;
+import java.util.List;
 
 public class WeatherApp {
 
-    static class WeatherAppResponse {
-        String name;
-        MainData main;
-        List<WeatherCondition> weather;
+    // --- AAPKA ORIGINAL DATA STRUCTURE ---
+    public static class WeatherAppResponse {
+        public String name;
+        public MainData main;
+        public List<WeatherData> weather;
+
+        public WeatherAppResponse() {
+            main = new MainData();
+            weather = new ArrayList<>();
+            weather.add(new WeatherData());
+        }
     }
 
-    static class MainData {
-        double temp;
-        int humidity;
+    public static class MainData {
+        public double temp; // Double kyunke aapne GUI mein Math.round() lagaya tha
+        public int humidity;
     }
 
-    static class WeatherCondition {
-        String description;
+    public static class WeatherData {
+        public String description;
     }
 
-    public static void main(String[] args) {
-
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("enter city name : ");
-
-        String city = scanner.nextLine();
-        scanner.close();
+    // --- AAPKA MAIN LOGIC METHOD ---
+    public static WeatherAppResponse getWeatherData(String city) throws Exception {
+        // YAHAN APNI API KEY DALEIN
         String apiKey = "7b2666f115e43f8e3fcfe13383273227";
-        String url = "https://api.openweathermap.org/data/2.5/weather?q=" + city + "&appid=" + apiKey + "&units=metric";
+        // Check karein ke city ke baad .replace laga hua hai ya nahi
+        String url = "https://api.openweathermap.org/data/2.5/weather?q=" + city.replace(" ", "%20") + "&appid=" + apiKey + "&units=metric";
 
-        try {
-            HttpClient client = HttpClient.newHttpClient();
-            HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).GET().build();
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).GET().build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-            if (response.statusCode() == 200) {
-                Gson gson = new Gson();
-                WeatherAppResponse weatherData = gson.fromJson(response.body(), WeatherAppResponse.class);
-
-                String desc = weatherData.weather.get(0).description;
-                String formattedDesc = desc.substring(0, 1).toUpperCase() + desc.substring(1);
-
-                System.out.println("=============================");
-                System.out.println("   WEATHER REPORT: " + weatherData.name);
-                System.out.println("=============================");
-                System.out.println("Temperature : " + weatherData.main.temp + "°C");
-                System.out.println("Humidity    : " + weatherData.main.humidity + "%");
-                System.out.println("Conditions  : " + formattedDesc);
-                System.out.println("=============================");
-
-            } else {
-                System.out.println("Failed to fetch data. HTTP Status Code: " + response.statusCode());
-            }
-
-        } catch (Exception e) {
-            System.out.println("Failed to fetch data : " + e.getMessage());
+        if (response.statusCode() == 200) {
+            Gson gson = new Gson();
+            return gson.fromJson(response.body(), WeatherAppResponse.class);
+        } else {
+            // Agar city na mile ya error ho toh exception throw karein
+            throw new Exception("City not found. HTTP Status: " + response.statusCode());
         }
     }
 }
+
