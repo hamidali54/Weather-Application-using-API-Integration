@@ -7,7 +7,7 @@ A simple and efficient command-line weather application built with Java. This ap
 * **Modern HTTP Client:** Uses Java 11's native `java.net.http.HttpClient` for making fast API requests.
 * **Smart JSON Parsing:** Utilizes Google's **Gson** library to cleanly deserialize raw JSON responses into Java Objects (POJOs).
 * **Interactive:** Uses `Scanner` to take dynamic city name inputs from the user.
-* **Error Handling:** Gracefully handles invalid city names and HTTP errors.
+* **Error Handling:** Gracefully handles invalid city names and HTTP errors
 
 ## 🛠️ Technologies Used
 * Java
